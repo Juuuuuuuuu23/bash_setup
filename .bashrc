@@ -1,11 +1,13 @@
+CUR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 # git supplement to prompt features
-if [ -f $HOME/.git-prompt.bash ]; then
-    source $HOME/.git-prompt.bash
+if [ -f $CUR_DIR/.git-prompt.bash ]; then
+    source $CUR_DIR/.git-prompt.bash
 fi
 
 # git function completion feature
-if [ -f $HOME/.git-prompt.bash ]; then
-    source $HOME/.git-prompt.bash
+if [ -f $CUR_DIR/.git-completion.bash ]; then 
+    source $CUR_DIR/.git-completion.bash
 fi
 
 # Define prompt colors
@@ -19,18 +21,18 @@ GREEN="\[\033[0;32m\]"
 WHITE="\[\033[0;39m\]"
 
 # Background colors
-B_RED="\[\033[0;41m\]"
-B_GREEN="\[\033[0;42m\]"
-B_YELLOW="\[\033[0;43m\]"
-B_BLUE="\[\033[0;44m\]"
-B_PURPLE="\[\033[0;45m\]"
-B_CYAN="\[\033[0;46m\]"
-B_WHITE="\[\033[30;43m\]"
+B_RED="[0;41m"
+B_GREEN="[0;42m"
+B_YELLOW="[0;43m"
+B_BLUE="[0;44m"
+B_PURPLE="[0;45m"
+B_CYAN="[0;46m"
+B_WHITE="[0;00m"
 
 select_color ()
 {
-    case $1 in
-    0) B_color=$WHITE ;;
+    case $COLOR_SELECTED in
+    0) B_color=$B_WHITE ;;
     1) B_color=$B_RED ;;
     2) B_color=$B_GREEN  ;;
     3) B_color=$B_YELLOW  ;;
@@ -38,9 +40,14 @@ select_color ()
     5) B_color=$B_PURPLE  ;;
     6) B_color=$B_CYAN  ;;
     7) B_color=$B_WHITE  ;;
-    *) echo "Color not found"
-       B_color=$WHITE ;;
+    *) B_color=$B_WHITE ;;
     esac
+    echo $B_color
+}
+
+cmark ()
+{
+    export COLOR_SELECTED="$1"
 }
 
 # Git prompt option
@@ -51,9 +58,10 @@ export LS_OPTIONS='--color=auto'
 export CLICOLOR='Yes'
 export LSCOLORS=gxfxbEaEBxxEhEhBaDaCaD
 
-select_color $1
+# Prompt color label
+export COLOR_SELECTED=0
 
-export PS1="$B_color\h:\W \u"'$(
+export PS1="\[\033\$(select_color)\]\h:\W \u"'$(
     if [[ $(__git_ps1) =~ \*\)$ ]]
     # a file has been modified but not added
     then echo "'$YELLOW'"$(__git_ps1 " (%s)")
@@ -64,4 +72,4 @@ export PS1="$B_color\h:\W \u"'$(
     else echo "'$GREEN'"$(__git_ps1 " (%s)")
     fi)'$WHITE' $'
 
-alias cmark="source .bashrc"
+export -f cmark
